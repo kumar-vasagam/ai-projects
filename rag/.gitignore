@@ -12,6 +12,7 @@ milvus_demo.db/
 
 # Agent run output dumps
 out*.*
+out.txt
 
 # macOS
 .DS_Store
