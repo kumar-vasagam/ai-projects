@@ -6,12 +6,12 @@
 __pycache__/
 *.pyc
 
-# Local Milvus Lite databases
-*.db/
-.*.db.lock
+# Local Milvus Lite database
+milvus_demo.db/
+.milvus_demo.db.lock
 
 # Agent run output dumps
-out*.json
+out*.*
 
 # macOS
 .DS_Store

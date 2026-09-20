@@ -1,0 +1,14 @@
+pypdf
+langchain-core
+openai
+langchain-openai
+langchain-openrouter
+python-dotenv
+langchain-postgres
+pymilvus
+pymilvus[model]
+pymilvus[milvus-lite]
+langchain-milvus
+pypdf
+langchain
+deepagents
