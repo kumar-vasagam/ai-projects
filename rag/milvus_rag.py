@@ -11,6 +11,8 @@ from openai import OpenAI
 from langchain.agents import create_agent
 from deepagents import create_deep_agent
 from langchain_openai import ChatOpenAI
+from agentevals.trajectory.llm import create_trajectory_llm_as_judge, TRAJECTORY_ACCURACY_PROMPT
+from agentevals.trajectory.match import create_trajectory_match_evaluator
 
 class MilvusRag():
     client = MilvusClient("milvus_demo.db")
@@ -285,7 +287,64 @@ def ask_a_question(question: str):
                            tools=[query_meta_data, query_real_data, get_final_response])
     out = da.invoke({"messages": [{"role": "user", "content": question}]})
     print("answer - ", out)
-    
+
+    # Trajectory LLM as a Judge
+    trajectory_evaluator = create_trajectory_llm_as_judge(prompt=TRAJECTORY_ACCURACY_PROMPT, model="openrouter:openai/gpt-oss-20b")
+    eval_result = trajectory_evaluator(outputs=out)
+    print("Eval with LLM->", eval_result)
+
+    ## Reference trajectory
+    reference_outputs = [
+    {"role": "user", "content": "Is solar panel permissible?"},
+    {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+            {
+                "function": {
+                    "name": "query_meta_data",
+                    "arguments": json.dumps({"question": "Is solar panel permissible", "collection_name": "metadata"}),
+                }
+            }
+        ],
+    },
+    {"role": "tool", "content": "A response from the query_meta_data tool"},
+    {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "function": {
+                        "name": "query_real_data",
+                        "arguments": json.dumps({"query": "Is solar panel permissible", "collection_name": "correct collection name"}),
+
+                    }
+                }
+            ],
+    },
+    {"role": "tool", "content": "A response from the query_real_data tool"},
+    {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+                {
+                    "function": {
+                        "name": "get_final_response",
+                        "arguments": json.dumps({"question": "Is solar panel permissible", "chunks": "some chunks"}),
+
+                    }
+                }
+            ],
+    },
+    {"role": "tool", "content": "A response from the get_final_response tool"},
+    {"role": "assistant", "content": "No, the solar panels are not permissble as per Freddie Mac's rules"},
+    ]
+    # tool_args_match_mode=ignore means it will ignore the contents of the arguments, but the arguments must be present in the reference output.
+    evaluator = create_trajectory_match_evaluator(trajectory_match_mode="strict", tool_args_match_mode="ignore")
+    eval_result_ref = evaluator(
+        outputs=out, reference_outputs=reference_outputs
+    )
+    print("Eval with Sefl ->",eval_result_ref)
 
 def main():
     # hello_milvus()

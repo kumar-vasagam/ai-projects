@@ -12,3 +12,4 @@ langchain-milvus
 pypdf
 langchain
 deepagents
+agentevals
