@@ -5,9 +5,9 @@ langchain-openai
 langchain-openrouter
 python-dotenv
 langchain-postgres
+milvus-model
+milvus-lite
 pymilvus
-pymilvus[model]
-pymilvus[milvus-lite]
 langchain-milvus
 pypdf
 langchain
